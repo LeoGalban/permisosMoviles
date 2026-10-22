@@ -1,56 +1,214 @@
-# Welcome to your Expo app 👋
+# Mantenimiento IPF
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App para que alumnos y docentes del Instituto Politécnico Formosa **reporten desperfectos del edificio** (una luz quemada, una canilla que pierde, un proyector roto) y reciban un aviso cuando se resuelven.
 
-## Get started
+TP N° 3 — Permisos móviles · Taller Complementario React Native II
+**Alumno:** Leonel Galban · **Stack:** Expo SDK 57 · Expo Router · TypeScript
 
-1. Install dependencies
+Las respuestas de las Partes A a F están en [RESPUESTAS.md](RESPUESTAS.md).
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Cómo correrla
 
 ```bash
-npm run reset-project
+npm install
+npx expo start            # probar en Expo Go (escanear el QR)
+npx expo run:android      # development build en Android (necesita Android Studio)
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-### Other setup steps
+## Árbol de carpetas de `src/app`
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```
+src/app/
+├── _layout.tsx              Stack principal (acá se define el modal)
+├── (tabs)/                  grupo: el paréntesis NO aparece en la URL
+│   ├── _layout.tsx          las 3 pestañas
+│   ├── index.tsx            /                    Tab "Reportes"
+│   ├── avisos.tsx           /avisos              Tab "Avisos"
+│   └── permisos.tsx         /permisos            Tab "Permisos"
+├── reporte/
+│   ├── nuevo.tsx            /reporte/nuevo
+│   ├── escanear.tsx         /reporte/escanear
+│   ├── foto.tsx             /reporte/foto
+│   ├── ubicacion.tsx        /reporte/ubicacion
+│   └── [id].tsx             /reporte/[id]        (los corchetes = parámetro)
+├── permisos/
+│   └── [recurso].tsx        /permisos/[recurso]  presentation: "modal"
+└── ajustes-app.tsx          /ajustes-app
+```
 
-## Learn more
+Las rutas estáticas (`nuevo`, `escanear`, `foto`, `ubicacion`) tienen prioridad sobre `[id]`, por eso `/reporte/nuevo` no se confunde con un id.
 
-To learn more about developing your project with Expo, look at the following resources:
+### Resto del código
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```
+src/
+├── components/   ui.tsx (botones, tarjetas…) · PermisoBloqueado.tsx
+├── hooks/        usePermiso.ts (hook unificado) · useRevisarAlVolver.ts (AppState)
+└── lib/          permisos.ts (toda la lógica de permisos) · ubicacion.ts
+                  notificaciones.ts · store.ts (datos en memoria)
+```
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## Cómo funcionan los permisos en la app
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+Persona toca una función (ej: "Escanear QR")
+        │
+        ▼
+usarConPermiso('camara', abrirEscaner)       ← src/lib/permisos.ts
+        │  consulta con get…() (sin diálogo)
+        ├── concedido   → abre el escáner directo
+        └── no concedido → pantalla previa /permisos/camara (modal)
+                              ├── preguntable → botón "Continuar" → diálogo del sistema
+                              │        ├── Permitir → abre el escáner
+                              │        └── No permitir → vuelve; queda la alternativa
+                              └── bloqueado  → camino en Ajustes + botón "Abrir Ajustes"
+```
+
+El hook [`usePermiso(recurso)`](src/hooks/usePermiso.ts) devuelve `estado` (`'cargando' | 'concedido' | 'preguntable' | 'bloqueado'`), `parcial`, `matiz`, `pedir()` y `abrirAjustes()`. Se actualiza al entrar a la pantalla y **al volver de Ajustes** (con `AppState`).
+
+La decisión entre "Continuar" y "Abrir Ajustes" la toma `estadoDe()` en [`src/lib/permisos.ts`](src/lib/permisos.ts), mirando **`granted`** y **`canAskAgain`**.
+
+---
+
+## Tabla de permisos
+
+| Recurso | Módulo | Cuándo se pide | Alternativa si se deniega |
+|---|---|---|---|
+| Cámara (escanear QR) | `expo-camera` (`useCameraPermissions`) | Al tocar "Escanear QR del aula" | Escribir el código del aula a mano |
+| Cámara (sacar foto) | `expo-image-picker` (`launchCameraAsync`) | Al tocar "Sacar foto" | Elegir la foto de la galería |
+| Fotos (galería) | `expo-image-picker` (`launchImageLibraryAsync`) | **Nunca**: es el selector del sistema, no necesita permiso | — |
+| Ubicación (primer plano) | `expo-location` | Al tocar "Usar mi ubicación actual" | Elegir el sector a mano (patio, pasillo, estacionamiento…) |
+| Notificaciones | `expo-notifications` | Al activar el interruptor de `/ajustes-app` | Los avisos aparecen en la bandeja `/avisos` |
+
+Ninguna pantalla pide permisos al abrirse, y la pantalla previa **nunca aparece sola**: solo cuando la persona toca la función (no insistir).
+
+---
+
+## Bloque `plugins` de `app.json` (comentado)
+
+> JSON no acepta comentarios: esta versión comentada es solo para leer. El archivo real es [app.json](app.json).
+
+```jsonc
+"plugins": [
+  "expo-router",
+  ["expo-splash-screen", { ... }],
+
+  // CÁMARA: texto de propósito propio (iOS) y SIN micrófono.
+  ["expo-camera", {
+    "cameraPermission": "Usamos tu cámara para leer el QR del aula y sacar la foto del desperfecto que reportás.",
+    "microphonePermission": false,   // iOS: no se agrega NSMicrophoneUsageDescription
+    "recordAudioAndroid": false      // Android: no se agrega RECORD_AUDIO
+  }],
+
+  // UBICACIÓN: solo "mientras se usa la app". Nada de segundo plano.
+  ["expo-location", {
+    "locationWhenInUsePermission": "Usamos tu ubicación para marcar en qué parte del edificio está el desperfecto que reportás.",
+    "isIosBackgroundLocationEnabled": false,
+    "isAndroidBackgroundLocationEnabled": false
+  }],
+
+  // IMAGE PICKER: usamos el selector del sistema, así que NO pedimos acceso a fotos.
+  ["expo-image-picker", {
+    "photosPermission": false,       // iOS: sin NSPhotoLibraryUsageDescription
+    "cameraPermission": "Usamos tu cámara para leer el QR del aula y sacar la foto del desperfecto que reportás.",
+    "microphonePermission": false    // sin micrófono (si no, agrega RECORD_AUDIO)
+  }],
+
+  // NOTIFICACIONES: en iOS no llevan texto de propósito. El canal "reportes"
+  // se crea en código antes de pedir el permiso (src/lib/permisos.ts).
+  "expo-notifications"
+]
+```
+
+### `blockedPermissions` (Android) y por qué
+
+| Permiso bloqueado | Por qué la app no lo necesita |
+|---|---|
+| `RECORD_AUDIO` | Nunca grabamos audio (escanear y sacar fotos no lo usan). |
+| `SYSTEM_ALERT_WINDOW` | No dibujamos encima de otras apps. |
+| `ACCESS_BACKGROUND_LOCATION` | La ubicación se usa solo con la app abierta. |
+| `READ_MEDIA_IMAGES` | Usamos el selector de fotos del sistema (sin permiso). |
+| `READ_MEDIA_VIDEO` | No usamos videos. |
+| `READ_MEDIA_VISUAL_USER_SELECTED` | No accedemos a la galería (ni siquiera parcialmente). |
+| `READ_EXTERNAL_STORAGE` | Lo agregan `expo-image-picker`, `expo-file-system` y `expo-image`, pero el selector del sistema no lo necesita. |
+| `WRITE_EXTERNAL_STORAGE` | No guardamos archivos fuera de la carpeta de la app. |
+
+---
+
+## Auditoría del manifiesto (desafío opcional)
+
+Resultado de `npx expo prebuild --clean --platform android` (`android/app/src/main/AndroidManifest.xml`) más los manifiestos de las librerías, que Android fusiona al compilar:
+
+| Permiso | Quién lo agrega | ¿Queda? |
+|---|---|---|
+| `INTERNET` | React Native / `expo-file-system` / `expo-image` | ✅ Sí (necesario para cargar la app) |
+| `CAMERA` | `expo-camera` y `expo-image-picker` | ✅ Sí |
+| `ACCESS_COARSE_LOCATION` | `expo-location` | ✅ Sí |
+| `ACCESS_FINE_LOCATION` | `expo-location` | ✅ Sí (la persona igual puede elegir "aproximada") |
+| `POST_NOTIFICATIONS` | `expo-notifications` | ✅ Sí |
+| `RECEIVE_BOOT_COMPLETED` | `expo-notifications` (reprogramar notificaciones al reiniciar) | ✅ Sí (de instalación) |
+| `ACCESS_NETWORK_STATE` | `expo-image` | ✅ Sí (de instalación) |
+| `VIBRATE` | Plantilla nativa que genera `expo prebuild` | ✅ Sí (de instalación) |
+| `RECORD_AUDIO` | `expo-camera` / `expo-image-picker` por defecto | ❌ Quitado (`recordAudioAndroid` / `microphonePermission: false` + `blockedPermissions`) |
+| `READ_EXTERNAL_STORAGE` | `expo-image-picker`, `expo-file-system`, `expo-image` | ❌ Quitado (`blockedPermissions`) |
+| `WRITE_EXTERNAL_STORAGE` | `expo-image-picker`, `expo-file-system` | ❌ Quitado (`blockedPermissions`) |
+| `SYSTEM_ALERT_WINDOW` | React Native, en el manifiesto de **debug** (menú de desarrollo) | ❌ Quitado (`blockedPermissions`) |
+| `ACCESS_BACKGROUND_LOCATION`, `READ_MEDIA_*` | (ninguna, bloqueados por seguridad) | ❌ Quitados (`blockedPermissions`) |
+
+En el manifiesto generado los quitados aparecen como `<uses-permission … tools:node="remove"/>`.
+
+---
+
+## Desafíos opcionales hechos
+
+- ✅ **Auditoría del manifiesto** (tabla de arriba).
+- ✅ **Bloqueo por plataforma**: [`PermisoBloqueado.tsx`](src/components/PermisoBloqueado.tsx) muestra el camino exacto en Ajustes según `Platform.OS` (`caminoEnAjustes()` en `src/lib/permisos.ts`).
+- ➖ **Notificaciones provisionales**: el panel `/permisos` ya **detecta y muestra** el estado provisional de iOS (`matizDe()`), pero no se pide con `allowProvisional`.
+
+---
+
+## Capturas
+
+> Reemplazar cada línea por la imagen: `![descripción](capturas/archivo.png)`
+
+| Qué | Captura |
+|---|---|
+| Escáner – cargando | _pendiente_ |
+| Escáner – concedido (cámara) | _pendiente_ |
+| Escáner – preguntable ("Continuar") | _pendiente_ |
+| Escáner – bloqueado ("Abrir Ajustes") | _pendiente_ |
+| Ubicación concedida | _pendiente_ |
+| Ubicación denegada (sector a mano) | _pendiente_ |
+| Foto desde el selector | _pendiente_ |
+| Notificación recibida | _pendiente_ |
+| Panel de permisos antes de ir a Ajustes | _pendiente_ |
+| Panel de permisos después de volver de Ajustes | _pendiente_ |
+| **Diálogo del sistema con mi texto de propósito (development build)** | _pendiente_ |
+
+---
+
+## Guía para la defensa oral
+
+**1. ¿Qué código decide entre "Continuar" y "Abrir Ajustes"?**
+`estadoDe()` en [`src/lib/permisos.ts`](src/lib/permisos.ts). Si `granted` es `true` → concedido. Si no, lo decide **`canAskAgain`**: `true` → "Continuar" (todavía puede aparecer el diálogo); `false` → "Abrir Ajustes" (el sistema ya no lo va a mostrar).
+
+**2. Revoco la cámara desde Ajustes con la app abierta y vuelvo.**
+Android **mata el proceso** de la app y, al volver, la reinicia. Mi código se entera porque `usePermiso` y el escáner usan `useRevisarAlVolver`, que escucha `AppState` y vuelve a consultar (`get…`) cuando la app pasa de `background` a `active`. También consulto cada vez que la pantalla recibe foco.
+
+**3. ¿Por qué no pido permiso para elegir una foto pero sí para sacarla?**
+Para elegir uso el **selector del sistema** (`launchImageLibraryAsync`): la persona elige una foto en una pantalla del sistema y la app solo recibe esa, nunca ve el resto de la galería. Para sacarla, la app usa la **cámara** directamente, y eso sí es un recurso protegido.
+
+**4. ¿Qué cambia si la persona elige ubicación aproximada? ¿Y si la deniega?**
+Aproximada: el reporte se guarda igual, pero **no muestro coordenadas** sino "Ubicación aproximada" (`android.accuracy === 'coarse'` / `ios.accuracy === 'reduced'`). Denegada: `obtenerUbicacion()` devuelve `null` y la persona **elige el sector a mano**; el reporte se puede crear igual.
+
+**5. ¿Por qué mis textos de propósito no aparecían en Expo Go?**
+Porque Expo Go es **otra app ya compilada**, con su propio `Info.plist`. Mi `app.json` solo se aplica cuando se compila **mi** app (development build).
+
+**6. Si agrego la nota de voz, ¿alcanza con una actualización OTA?**
+**No.** Necesito declarar el micrófono (`NSMicrophoneUsageDescription` y `RECORD_AUDIO`, y sacarlo de `blockedPermissions`). Eso es **código nativo** (Info.plist / manifiesto), y una OTA solo cambia JavaScript. Hace falta una **build nueva** y publicarla en las tiendas.
