@@ -5,9 +5,18 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 
-import { Boton, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import {
+  Boton,
+  Encabezado,
+  ESTILO_REPORTE,
+  Pantalla,
+  Pastilla,
+  Tarjeta,
+  Texto,
+  Titulo,
+} from '@/components/ui';
 import { simularResolucion } from '@/lib/notificaciones';
-import { useApp } from '@/lib/store';
+import { ICONO_CATEGORIA, useApp } from '@/lib/store';
 
 export default function DetalleReporte() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,21 +50,25 @@ export default function DetalleReporte() {
 
   return (
     <Pantalla>
-      <Tarjeta>
-        <Titulo>{reporte.titulo}</Titulo>
+      <Encabezado
+        icono={ICONO_CATEGORIA[reporte.categoria]}
+        titulo={reporte.titulo}
+        subtitulo={`Categoría: ${reporte.categoria}`}
+      />
+
+      <Tarjeta color={ESTILO_REPORTE[reporte.estado].color}>
+        <Pastilla {...ESTILO_REPORTE[reporte.estado]} />
         <Texto>{reporte.descripcion || 'Sin descripción.'}</Texto>
-        <Texto suave>Aula: {reporte.aula || '—'}</Texto>
-        <Texto suave>Categoría: {reporte.categoria}</Texto>
-        <Texto suave>
-          Ubicación:{' '}
+        <Texto>🚪 Aula: {reporte.aula || '—'}</Texto>
+        <Texto>
+          📍 Ubicación:{' '}
           {u
             ? u.aproximada
               ? 'Ubicación aproximada'
               : `${u.latitud.toFixed(5)}, ${u.longitud.toFixed(5)}`
             : 'sin coordenadas'}
         </Texto>
-        <Texto suave>Sector: {reporte.sector ?? '—'}</Texto>
-        <Texto>Estado: {reporte.estado.toUpperCase()}</Texto>
+        <Texto>🧭 Sector: {reporte.sector ?? '—'}</Texto>
       </Tarjeta>
 
       {reporte.fotoUri && (
@@ -63,7 +76,7 @@ export default function DetalleReporte() {
       )}
 
       <Boton
-        titulo="Simular resolución"
+        titulo="🛠️  Simular resolución"
         onPress={simular}
         deshabilitado={reporte.estado !== 'pendiente'}
       />

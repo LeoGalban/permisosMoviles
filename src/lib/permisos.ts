@@ -17,18 +17,24 @@ export const RECURSOS: Recurso[] = ['camara', 'ubicacion', 'notificaciones'];
 export type EstadoPermiso = 'cargando' | 'concedido' | 'preguntable' | 'bloqueado';
 
 // Textos para la pantalla previa (/permisos/[recurso]) y el panel.
-export const INFO: Record<Recurso, { nombre: string; beneficio: string; alternativa: string }> = {
+export const INFO: Record<
+  Recurso,
+  { icono: string; nombre: string; beneficio: string; alternativa: string }
+> = {
   camara: {
+    icono: '📷',
     nombre: 'Cámara',
     beneficio: 'Usamos tu cámara para leer el QR del aula y sacar la foto del desperfecto.',
     alternativa: 'Podés escribir el código del aula a mano y elegir la foto desde la galería.',
   },
   ubicacion: {
+    icono: '📍',
     nombre: 'Ubicación',
     beneficio: 'Usamos tu ubicación para marcar en qué parte del edificio está el problema.',
     alternativa: 'Podés elegir el sector (patio, pasillo, estacionamiento) a mano.',
   },
   notificaciones: {
+    icono: '🔔',
     nombre: 'Notificaciones',
     beneficio: 'Te avisamos cuando tu reporte se resuelva.',
     alternativa: 'Los avisos igual aparecen en la pestaña "Avisos" dentro de la app.',

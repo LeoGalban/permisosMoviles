@@ -11,6 +11,13 @@ export type Sector = 'Patio' | 'Estacionamiento' | 'Pasillo' | 'Aula' | 'Baños'
 export const CATEGORIAS: Categoria[] = ['electricidad', 'agua', 'mobiliario', 'equipos'];
 export const SECTORES: Sector[] = ['Patio', 'Estacionamiento', 'Pasillo', 'Aula', 'Baños'];
 
+export const ICONO_CATEGORIA: Record<Categoria, string> = {
+  electricidad: '💡',
+  agua: '🚰',
+  mobiliario: '🪑',
+  equipos: '📽️',
+};
+
 export type Ubicacion = { latitud: number; longitud: number; aproximada: boolean };
 
 export type Borrador = {
@@ -68,6 +75,7 @@ export function useApp() {
       return () => oyentes.delete(oyente);
     },
     () => estado,
+    () => estado, // en la web, Expo dibuja primero en el servidor y también necesita leer el estado
   );
 }
 

@@ -3,8 +3,9 @@
 // Los avisos llegan acá siempre, haya o no permiso.
 
 import { router } from 'expo-router';
+import { Text } from 'react-native';
 
-import { Boton, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import { Boton, colores, Encabezado, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
 import { useApp } from '@/lib/store';
 
 export default function Avisos() {
@@ -12,22 +13,25 @@ export default function Avisos() {
 
   return (
     <Pantalla>
-      <Texto suave>
-        Acá ves todos los avisos aunque las notificaciones del sistema estén desactivadas.
-      </Texto>
+      <Encabezado
+        icono="🔔"
+        titulo="Bandeja de avisos"
+        subtitulo="Llegan acá aunque las notificaciones estén apagadas."
+      />
 
       {avisos.length === 0 && (
         <Tarjeta>
+          <Text style={{ fontSize: 48, textAlign: 'center' }}>📭</Text>
           <Texto>No tenés avisos todavía.</Texto>
           <Texto suave>Probá «Simular resolución» en el detalle de un reporte.</Texto>
         </Tarjeta>
       )}
 
       {avisos.map((a) => (
-        <Tarjeta key={a.id}>
+        <Tarjeta key={a.id} color={colores.verde}>
           <Titulo>{a.titulo}</Titulo>
           <Texto>{a.cuerpo}</Texto>
-          <Texto suave>{new Date(a.fecha).toLocaleString()}</Texto>
+          <Texto suave>🕒 {new Date(a.fecha).toLocaleString()}</Texto>
           <Boton
             titulo="Ver reporte"
             secundario
@@ -36,7 +40,7 @@ export default function Avisos() {
         </Tarjeta>
       ))}
 
-      <Boton titulo="⚙️ Ajustes de avisos" secundario onPress={() => router.push('/ajustes-app')} />
+      <Boton titulo="⚙️  Ajustes de avisos" secundario onPress={() => router.push('/ajustes-app')} />
     </Pantalla>
   );
 }

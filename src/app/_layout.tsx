@@ -9,8 +9,10 @@ export default function RootLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colores.primario },
+        headerStyle: { backgroundColor: colores.primarioOscuro },
         headerTintColor: '#fff',
+        headerTitleStyle: { fontWeight: '800' },
+        contentStyle: { backgroundColor: colores.fondo },
       }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="reporte/nuevo" options={{ title: 'Nuevo reporte' }} />

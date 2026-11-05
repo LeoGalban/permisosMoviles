@@ -7,7 +7,9 @@
 import { router, useLocalSearchParams } from 'expo-router';
 
 import { PermisoBloqueado } from '@/components/PermisoBloqueado';
-import { Boton, Cargando, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import { Text, View } from 'react-native';
+
+import { Boton, Cargando, colores, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
 import { usePermiso } from '@/hooks/usePermiso';
 import {
   descartarPendiente,
@@ -57,10 +59,17 @@ function Contenido({ recurso }: { recurso: Recurso }) {
   return (
     <Pantalla>
       <Tarjeta>
-        <Titulo>{info.nombre}</Titulo>
-        <Texto>{info.beneficio}</Texto>
-        <Texto suave>Podés cambiar esta decisión cuando quieras desde Ajustes.</Texto>
+        <View style={{ alignItems: 'center', gap: 10, paddingVertical: 12 }}>
+          <Text style={{ fontSize: 64 }}>{info.icono}</Text>
+          <Titulo>{info.nombre}</Titulo>
+          <Text style={{ fontSize: 18, textAlign: 'center', lineHeight: 26, color: colores.texto }}>
+            {info.beneficio}
+          </Text>
+        </View>
         <Boton titulo="Continuar" onPress={continuar} />
+        <Text style={{ textAlign: 'center', color: colores.suave, fontSize: 14 }}>
+          Podés cambiar esta decisión cuando quieras desde Ajustes.
+        </Text>
       </Tarjeta>
     </Pantalla>
   );
