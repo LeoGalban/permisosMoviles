@@ -3,9 +3,20 @@
 // Los avisos llegan acá siempre, haya o no permiso.
 
 import { router } from 'expo-router';
-import { Text } from 'react-native';
+import { View } from 'react-native';
 
-import { Boton, colores, Encabezado, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import {
+  BotonIcono,
+  colores,
+  Encabezado,
+  Fila,
+  Icono,
+  Lista,
+  Pantalla,
+  Tarjeta,
+  Texto,
+  Titulo,
+} from '@/components/ui';
 import { useApp } from '@/lib/store';
 
 export default function Avisos() {
@@ -14,33 +25,38 @@ export default function Avisos() {
   return (
     <Pantalla>
       <Encabezado
-        icono="🔔"
-        titulo="Bandeja de avisos"
+        titulo="Avisos"
         subtitulo="Llegan acá aunque las notificaciones estén apagadas."
+        accion={
+          <BotonIcono
+            nombre="settings-outline"
+            etiqueta="Ajustes de avisos"
+            onPress={() => router.push('/ajustes-app')}
+          />
+        }
       />
 
-      {avisos.length === 0 && (
+      {avisos.length === 0 ? (
         <Tarjeta>
-          <Text style={{ fontSize: 48, textAlign: 'center' }}>📭</Text>
-          <Texto>No tenés avisos todavía.</Texto>
-          <Texto suave>Probá «Simular resolución» en el detalle de un reporte.</Texto>
+          <View style={{ alignItems: 'center', gap: 8, paddingVertical: 16 }}>
+            <Icono nombre="mail-open-outline" color={colores.marcador} tam={36} />
+            <Titulo>No tenés avisos</Titulo>
+            <Texto suave>Probá «Simular resolución» en un reporte.</Texto>
+          </View>
         </Tarjeta>
+      ) : (
+        <Lista>
+          {avisos.map((a) => (
+            <Fila
+              key={a.id}
+              icono="checkmark-circle"
+              titulo={a.titulo}
+              detalle={`${a.cuerpo}\n${new Date(a.fecha).toLocaleString()}`}
+              onPress={() => router.push({ pathname: '/reporte/[id]', params: { id: a.reporteId } })}
+            />
+          ))}
+        </Lista>
       )}
-
-      {avisos.map((a) => (
-        <Tarjeta key={a.id} color={colores.verde}>
-          <Titulo>{a.titulo}</Titulo>
-          <Texto>{a.cuerpo}</Texto>
-          <Texto suave>🕒 {new Date(a.fecha).toLocaleString()}</Texto>
-          <Boton
-            titulo="Ver reporte"
-            secundario
-            onPress={() => router.push({ pathname: '/reporte/[id]', params: { id: a.reporteId } })}
-          />
-        </Tarjeta>
-      ))}
-
-      <Boton titulo="⚙️  Ajustes de avisos" secundario onPress={() => router.push('/ajustes-app')} />
     </Pantalla>
   );
 }

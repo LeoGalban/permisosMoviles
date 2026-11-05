@@ -3,19 +3,18 @@
 // porque cada fila usa usePermiso (que escucha AppState).
 
 import { router } from 'expo-router';
-import { Platform, Text, View } from 'react-native';
+import { Platform, View } from 'react-native';
 
 import {
   Boton,
   colores,
   Encabezado,
-  ESTILO_ESTADO,
   EtiquetaEstado,
+  Fila,
+  Lista,
   Pantalla,
   Pastilla,
-  Tarjeta,
-  Texto,
-  Titulo,
+  Seccion,
 } from '@/components/ui';
 import { usePermiso } from '@/hooks/usePermiso';
 import { INFO, RECURSOS, type Recurso } from '@/lib/permisos';
@@ -24,27 +23,29 @@ function FilaPermiso({ recurso }: { recurso: Recurso }) {
   const { estado, matiz, abrirAjustes } = usePermiso(recurso);
 
   return (
-    <Tarjeta color={ESTILO_ESTADO[estado].color}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-        <Text style={{ fontSize: 34 }}>{INFO[recurso].icono}</Text>
-        <View style={{ flex: 1, gap: 6 }}>
-          <Titulo>{INFO[recurso].nombre}</Titulo>
-          <EtiquetaEstado estado={estado} />
-        </View>
-      </View>
-      {matiz && (
-        <Pastilla texto={`◐ Parcial: ${matiz}`} color={colores.primario} fondo={colores.primarioClaro} />
-      )}
-      <Texto suave>Plataforma: {Platform.OS}</Texto>
-
+    <View>
+      <Fila
+        icono={INFO[recurso].icono}
+        titulo={INFO[recurso].nombre}
+        detalle={matiz ? `Parcial: ${matiz} · ${Platform.OS}` : `Plataforma: ${Platform.OS}`}
+        derecha={<EtiquetaEstado estado={estado} />}
+      />
       {estado === 'preguntable' && (
-        <Boton
-          titulo="Pedir permiso"
-          onPress={() => router.push({ pathname: '/permisos/[recurso]', params: { recurso } })}
-        />
+        <View style={{ paddingLeft: 66, paddingBottom: 14 }}>
+          <Boton
+            titulo="Pedir permiso"
+            chico
+            secundario
+            onPress={() => router.push({ pathname: '/permisos/[recurso]', params: { recurso } })}
+          />
+        </View>
       )}
-      {estado === 'bloqueado' && <Boton titulo="⚙️  Abrir Ajustes" onPress={abrirAjustes} />}
-    </Tarjeta>
+      {estado === 'bloqueado' && (
+        <View style={{ paddingLeft: 66, paddingBottom: 14 }}>
+          <Boton titulo="Abrir Ajustes" chico secundario onPress={abrirAjustes} />
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -52,28 +53,25 @@ export default function PanelPermisos() {
   return (
     <Pantalla>
       <Encabezado
-        icono="🔐"
-        titulo="Tus permisos"
+        titulo="Permisos"
         subtitulo="Si cambiás algo en Ajustes, al volver se actualiza solo."
       />
 
-      {RECURSOS.map((recurso) => (
-        <FilaPermiso key={recurso} recurso={recurso} />
-      ))}
+      <Lista>
+        {RECURSOS.map((recurso) => (
+          <FilaPermiso key={recurso} recurso={recurso} />
+        ))}
+      </Lista>
 
-      <Tarjeta color={colores.verde}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <Text style={{ fontSize: 34 }}>🖼️</Text>
-          <View style={{ flex: 1, gap: 6 }}>
-            <Titulo>Fotos (galería)</Titulo>
-            <Pastilla texto="✅ No hace falta" color={colores.verde} fondo={colores.verdeClaro} />
-          </View>
-        </View>
-        <Texto suave>
-          Usamos el selector de fotos del sistema: la persona elige UNA foto y la app solo recibe
-          esa.
-        </Texto>
-      </Tarjeta>
+      <Seccion>Sin permiso</Seccion>
+      <Lista>
+        <Fila
+          icono="image-outline"
+          titulo="Fotos de la galería"
+          detalle="Usamos el selector del sistema: la app solo recibe la foto que elegís."
+          derecha={<Pastilla texto="No hace falta" color={colores.verde} fondo={colores.verdeClaro} />}
+        />
+      </Lista>
     </Pantalla>
   );
 }

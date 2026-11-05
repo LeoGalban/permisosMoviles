@@ -7,8 +7,9 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
+import { View } from 'react-native';
 
-import { Boton, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import { Boton, colores, Fila, Icono, Lista, Pantalla, Tarjeta, Texto } from '@/components/ui';
 import { usePermiso } from '@/hooks/usePermiso';
 import { usarConPermiso } from '@/lib/permisos';
 import { editarBorrador, useApp } from '@/lib/store';
@@ -34,23 +35,41 @@ export default function Foto() {
 
   return (
     <Pantalla>
-      <Tarjeta>
-        <Titulo>Foto del desperfecto</Titulo>
-        {borrador.fotoUri ? (
-          <Image source={{ uri: borrador.fotoUri }} style={{ height: 220, borderRadius: 8 }} />
-        ) : (
-          <Texto suave>Todavía no adjuntaste ninguna foto.</Texto>
-        )}
-      </Tarjeta>
-
-      <Boton titulo="📷 Sacar foto" onPress={() => usarConPermiso('camara', sacarFoto)} />
-      {estado === 'bloqueado' && (
-        <Texto suave>La cámara está bloqueada. Podés elegir la foto desde la galería.</Texto>
+      {borrador.fotoUri ? (
+        <Image
+          source={{ uri: borrador.fotoUri }}
+          style={{ height: 240, borderRadius: 12 }}
+          contentFit="cover"
+        />
+      ) : (
+        <Tarjeta>
+          <View style={{ alignItems: 'center', gap: 8, paddingVertical: 24 }}>
+            <Icono nombre="image-outline" color={colores.marcador} tam={36} />
+            <Texto suave>Todavía no adjuntaste ninguna foto.</Texto>
+          </View>
+        </Tarjeta>
       )}
 
-      <Boton titulo="🖼️ Elegir de la galería" secundario onPress={elegirDeGaleria} />
+      <Lista>
+        <Fila
+          icono="camera-outline"
+          titulo="Sacar foto"
+          detalle={
+            estado === 'bloqueado'
+              ? 'Cámara bloqueada: podés elegirla de la galería'
+              : 'Usa la cámara del teléfono'
+          }
+          onPress={() => usarConPermiso('camara', sacarFoto)}
+        />
+        <Fila
+          icono="images-outline"
+          titulo="Elegir de la galería"
+          detalle="No requiere permisos"
+          onPress={elegirDeGaleria}
+        />
+      </Lista>
 
-      {borrador.fotoUri && <Boton titulo="Listo" onPress={() => router.back()} />}
+      {borrador.fotoUri && <Boton titulo="Listo" acento onPress={() => router.back()} />}
     </Pantalla>
   );
 }

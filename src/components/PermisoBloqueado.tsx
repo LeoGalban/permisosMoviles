@@ -5,30 +5,33 @@ import { Text, View } from 'react-native';
 
 import { abrirAjustes, caminoEnAjustes, INFO, type Recurso } from '@/lib/permisos';
 
-import { Boton, colores, Tarjeta, Texto, Titulo } from './ui';
+import { Boton, colores, Icono, Tarjeta, Texto, Titulo } from './ui';
 
 export function PermisoBloqueado({ recurso }: { recurso: Recurso }) {
   return (
-    <Tarjeta color={colores.rojo}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-        <Text style={{ fontSize: 30 }}>⛔</Text>
-        <Titulo>{INFO[recurso].nombre} bloqueada</Titulo>
+    <Tarjeta>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Icono nombre="lock-closed" color={colores.rojo} tam={20} />
+        <View style={{ flex: 1 }}>
+          <Titulo>{INFO[recurso].nombre}: bloqueado</Titulo>
+        </View>
       </View>
       <Texto>Para activarlo tenés que ir a los Ajustes del teléfono:</Texto>
       <Text
         style={{
-          backgroundColor: colores.rojoClaro,
-          color: colores.rojo,
-          fontWeight: '700',
-          fontSize: 15,
+          backgroundColor: colores.fondo,
+          color: colores.texto,
+          fontWeight: '500',
+          fontSize: 14,
+          lineHeight: 20,
           padding: 12,
-          borderRadius: 10,
+          borderRadius: 8,
           overflow: 'hidden',
         }}>
         {caminoEnAjustes(recurso)}
       </Text>
-      <Texto suave>💡 {INFO[recurso].alternativa}</Texto>
-      <Boton titulo="⚙️  Abrir Ajustes" onPress={abrirAjustes} />
+      <Texto suave>{INFO[recurso].alternativa}</Texto>
+      <Boton titulo="Abrir Ajustes" onPress={abrirAjustes} />
     </Tarjeta>
   );
 }

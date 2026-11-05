@@ -6,12 +6,24 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { TextInput, View } from 'react-native';
 
-import { Boton, Chip, estilos, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import {
+  Boton,
+  Campo,
+  Chip,
+  colores,
+  estilos,
+  Fila,
+  Lista,
+  Pantalla,
+  Seccion,
+  Tarjeta,
+} from '@/components/ui';
 import { usarConPermiso } from '@/lib/permisos';
-import { CATEGORIAS, editarBorrador, guardarReporte, useApp } from '@/lib/store';
+import { CATEGORIAS, editarBorrador, guardarReporte, ICONO_CATEGORIA, useApp } from '@/lib/store';
 
 export default function NuevoReporte() {
   const { borrador } = useApp();
+  const u = borrador.ubicacion;
 
   function guardar() {
     const reporte = guardarReporte();
@@ -21,84 +33,85 @@ export default function NuevoReporte() {
   return (
     <Pantalla>
       <Tarjeta>
-        <Titulo>Datos</Titulo>
-        <TextInput
-          style={estilos.input}
-          placeholder="Título (ej: canilla que pierde)"
-          value={borrador.titulo}
-          onChangeText={(titulo) => editarBorrador({ titulo })}
-        />
-        <TextInput
-          style={[estilos.input, { minHeight: 70 }]}
-          placeholder="Descripción"
-          multiline
-          value={borrador.descripcion}
-          onChangeText={(descripcion) => editarBorrador({ descripcion })}
-        />
+        <Campo etiqueta="Título">
+          <TextInput
+            style={estilos.input}
+            placeholder="Ej: canilla que pierde"
+            placeholderTextColor={colores.marcador}
+            value={borrador.titulo}
+            onChangeText={(titulo) => editarBorrador({ titulo })}
+          />
+        </Campo>
+        <Campo etiqueta="Descripción">
+          <TextInput
+            style={[estilos.input, { minHeight: 80, textAlignVertical: 'top' }]}
+            placeholder="Contanos qué pasa"
+            placeholderTextColor={colores.marcador}
+            multiline
+            value={borrador.descripcion}
+            onChangeText={(descripcion) => editarBorrador({ descripcion })}
+          />
+        </Campo>
         {/* Alternativa a la cámara: el aula se puede escribir a mano */}
-        <TextInput
-          style={estilos.input}
-          placeholder="Aula (escribila o escaneá el QR)"
-          autoCapitalize="characters"
-          value={borrador.aula}
-          onChangeText={(aula) => editarBorrador({ aula })}
-        />
-        <Boton
-          titulo="📷 Escanear QR del aula"
-          secundario
+        <Campo etiqueta="Aula">
+          <TextInput
+            style={estilos.input}
+            placeholder="Escribila o escaneá el QR"
+            placeholderTextColor={colores.marcador}
+            autoCapitalize="characters"
+            value={borrador.aula}
+            onChangeText={(aula) => editarBorrador({ aula })}
+          />
+        </Campo>
+        <Campo etiqueta="Categoría">
+          <View style={estilos.grupo}>
+            {CATEGORIAS.map((c) => (
+              <Chip
+                key={c}
+                texto={c}
+                icono={ICONO_CATEGORIA[c]}
+                activo={borrador.categoria === c}
+                onPress={() => editarBorrador({ categoria: c })}
+              />
+            ))}
+          </View>
+        </Campo>
+      </Tarjeta>
+
+      <Seccion>Información adicional</Seccion>
+      <Lista>
+        <Fila
+          icono="qr-code-outline"
+          titulo="Escanear QR del aula"
+          detalle="Completa el aula automáticamente"
           onPress={() => usarConPermiso('camara', () => router.push('/reporte/escanear'))}
         />
-      </Tarjeta>
-
-      <Tarjeta>
-        <Titulo>Categoría</Titulo>
-        <Texto suave>Elegí una:</Texto>
-        <ChipsCategoria />
-      </Tarjeta>
-
-      <Tarjeta>
-        <Titulo>Foto</Titulo>
-        {borrador.fotoUri ? (
-          <Image source={{ uri: borrador.fotoUri }} style={{ height: 160, borderRadius: 8 }} />
-        ) : (
-          <Texto suave>Sin foto.</Texto>
-        )}
-        <Boton titulo="🖼️ Adjuntar foto" secundario onPress={() => router.push('/reporte/foto')} />
-      </Tarjeta>
-
-      <Tarjeta>
-        <Titulo>Ubicación</Titulo>
-        <Texto suave>
-          {borrador.ubicacion
-            ? borrador.ubicacion.aproximada
-              ? 'Ubicación aproximada'
-              : `${borrador.ubicacion.latitud.toFixed(5)}, ${borrador.ubicacion.longitud.toFixed(5)}`
-            : (borrador.sector ?? 'Sin marcar.')}
-        </Texto>
-        <Boton
-          titulo="📍 Marcar ubicación"
-          secundario
+        <Fila
+          icono="image-outline"
+          titulo="Adjuntar foto"
+          detalle={borrador.fotoUri ? 'Foto adjunta' : 'Sin foto'}
+          derecha={
+            borrador.fotoUri ? (
+              <Image source={{ uri: borrador.fotoUri }} style={{ width: 40, height: 40, borderRadius: 6 }} />
+            ) : undefined
+          }
+          onPress={() => router.push('/reporte/foto')}
+        />
+        <Fila
+          icono="location-outline"
+          titulo="Marcar ubicación"
+          detalle={
+            u
+              ? u.aproximada
+                ? 'Ubicación aproximada'
+                : `${u.latitud.toFixed(5)}, ${u.longitud.toFixed(5)}`
+              : (borrador.sector ?? 'Sin marcar')
+          }
           onPress={() => router.push('/reporte/ubicacion')}
         />
-      </Tarjeta>
+      </Lista>
 
-      <Boton titulo="Guardar reporte" onPress={guardar} deshabilitado={!borrador.titulo.trim()} />
+      <Boton titulo="Guardar reporte" acento onPress={guardar} deshabilitado={!borrador.titulo.trim()} />
     </Pantalla>
-  );
-}
-
-function ChipsCategoria() {
-  const { borrador } = useApp();
-  return (
-    <View style={estilos.fila}>
-      {CATEGORIAS.map((c) => (
-        <Chip
-          key={c}
-          texto={c}
-          activo={borrador.categoria === c}
-          onPress={() => editarBorrador({ categoria: c })}
-        />
-      ))}
-    </View>
   );
 }

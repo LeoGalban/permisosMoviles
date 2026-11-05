@@ -4,6 +4,8 @@
 
 import { useSyncExternalStore } from 'react';
 
+import type { NombreIcono } from '@/components/ui';
+
 export type Categoria = 'electricidad' | 'agua' | 'mobiliario' | 'equipos';
 export type EstadoReporte = 'pendiente' | 'en curso' | 'resuelto';
 export type Sector = 'Patio' | 'Estacionamiento' | 'Pasillo' | 'Aula' | 'Baños';
@@ -11,11 +13,11 @@ export type Sector = 'Patio' | 'Estacionamiento' | 'Pasillo' | 'Aula' | 'Baños'
 export const CATEGORIAS: Categoria[] = ['electricidad', 'agua', 'mobiliario', 'equipos'];
 export const SECTORES: Sector[] = ['Patio', 'Estacionamiento', 'Pasillo', 'Aula', 'Baños'];
 
-export const ICONO_CATEGORIA: Record<Categoria, string> = {
-  electricidad: '💡',
-  agua: '🚰',
-  mobiliario: '🪑',
-  equipos: '📽️',
+export const ICONO_CATEGORIA: Record<Categoria, NombreIcono> = {
+  electricidad: 'bulb-outline',
+  agua: 'water-outline',
+  mobiliario: 'cube-outline',
+  equipos: 'tv-outline',
 };
 
 export type Ubicacion = { latitud: number; longitud: number; aproximada: boolean };
@@ -51,7 +53,7 @@ let estado: EstadoApp = {
       aula: 'A12',
       categoria: 'electricidad',
       sector: 'Aula',
-      estado: 'en curso',
+      estado: 'pendiente',
       fecha: new Date().toISOString(),
     },
   ],

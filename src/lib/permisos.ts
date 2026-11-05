@@ -9,6 +9,8 @@ import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { Linking, Platform } from 'react-native';
 
+import type { NombreIcono } from '@/components/ui';
+
 export type Recurso = 'camara' | 'ubicacion' | 'notificaciones';
 
 export const RECURSOS: Recurso[] = ['camara', 'ubicacion', 'notificaciones'];
@@ -19,22 +21,22 @@ export type EstadoPermiso = 'cargando' | 'concedido' | 'preguntable' | 'bloquead
 // Textos para la pantalla previa (/permisos/[recurso]) y el panel.
 export const INFO: Record<
   Recurso,
-  { icono: string; nombre: string; beneficio: string; alternativa: string }
+  { icono: NombreIcono; nombre: string; beneficio: string; alternativa: string }
 > = {
   camara: {
-    icono: '📷',
+    icono: 'camera-outline',
     nombre: 'Cámara',
     beneficio: 'Usamos tu cámara para leer el QR del aula y sacar la foto del desperfecto.',
     alternativa: 'Podés escribir el código del aula a mano y elegir la foto desde la galería.',
   },
   ubicacion: {
-    icono: '📍',
+    icono: 'location-outline',
     nombre: 'Ubicación',
     beneficio: 'Usamos tu ubicación para marcar en qué parte del edificio está el problema.',
     alternativa: 'Podés elegir el sector (patio, pasillo, estacionamiento) a mano.',
   },
   notificaciones: {
-    icono: '🔔',
+    icono: 'notifications-outline',
     nombre: 'Notificaciones',
     beneficio: 'Te avisamos cuando tu reporte se resuelva.',
     alternativa: 'Los avisos igual aparecen en la pestaña "Avisos" dentro de la app.',

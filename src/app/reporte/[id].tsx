@@ -4,13 +4,16 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
+import { View } from 'react-native';
 
 import {
   Boton,
-  Encabezado,
   ESTILO_REPORTE,
+  Fila,
+  Lista,
   Pantalla,
   Pastilla,
+  Seccion,
   Tarjeta,
   Texto,
   Titulo,
@@ -42,7 +45,7 @@ export default function DetalleReporte() {
     setMensaje(
       notificacion
         ? 'En 10 segundos vas a recibir una notificación.'
-        : 'Las notificaciones están desactivadas: en 10 segundos el aviso aparece en la pestaña "Avisos".',
+        : 'Las notificaciones están desactivadas: en 10 segundos el aviso aparece en la pestaña «Avisos».',
     );
   }
 
@@ -50,33 +53,49 @@ export default function DetalleReporte() {
 
   return (
     <Pantalla>
-      <Encabezado
-        icono={ICONO_CATEGORIA[reporte.categoria]}
-        titulo={reporte.titulo}
-        subtitulo={`Categoría: ${reporte.categoria}`}
-      />
-
-      <Tarjeta color={ESTILO_REPORTE[reporte.estado].color}>
-        <Pastilla {...ESTILO_REPORTE[reporte.estado]} />
+      <Tarjeta>
+        <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Titulo>{reporte.titulo}</Titulo>
+          </View>
+          <Pastilla {...ESTILO_REPORTE[reporte.estado]} />
+        </View>
         <Texto>{reporte.descripcion || 'Sin descripción.'}</Texto>
-        <Texto>🚪 Aula: {reporte.aula || '—'}</Texto>
-        <Texto>
-          📍 Ubicación:{' '}
-          {u
-            ? u.aproximada
-              ? 'Ubicación aproximada'
-              : `${u.latitud.toFixed(5)}, ${u.longitud.toFixed(5)}`
-            : 'sin coordenadas'}
-        </Texto>
-        <Texto>🧭 Sector: {reporte.sector ?? '—'}</Texto>
       </Tarjeta>
 
       {reporte.fotoUri && (
-        <Image source={{ uri: reporte.fotoUri }} style={{ height: 220, borderRadius: 12 }} />
+        <Image
+          source={{ uri: reporte.fotoUri }}
+          style={{ height: 220, borderRadius: 12 }}
+          contentFit="cover"
+        />
       )}
 
+      <Seccion>Datos</Seccion>
+      <Lista>
+        <Fila
+          icono={ICONO_CATEGORIA[reporte.categoria]}
+          titulo="Categoría"
+          detalle={reporte.categoria.charAt(0).toUpperCase() + reporte.categoria.slice(1)}
+        />
+        <Fila icono="enter-outline" titulo="Aula" detalle={reporte.aula || '—'} />
+        <Fila
+          icono="location-outline"
+          titulo="Ubicación"
+          detalle={
+            u
+              ? u.aproximada
+                ? 'Ubicación aproximada'
+                : `${u.latitud.toFixed(5)}, ${u.longitud.toFixed(5)}`
+              : 'Sin coordenadas'
+          }
+        />
+        <Fila icono="compass-outline" titulo="Sector" detalle={reporte.sector ?? '—'} />
+      </Lista>
+
       <Boton
-        titulo="🛠️  Simular resolución"
+        titulo="Simular resolución"
+        secundario
         onPress={simular}
         deshabilitado={reporte.estado !== 'pendiente'}
       />

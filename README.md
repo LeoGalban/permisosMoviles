@@ -46,7 +46,7 @@ Las rutas estáticas (`nuevo`, `escanear`, `foto`, `ubicacion`) tienen prioridad
 
 ```
 src/
-├── components/   ui.tsx (botones, tarjetas…) · PermisoBloqueado.tsx
+├── components/   ui.tsx (colores del IPF, botones, tarjetas…) · Portada.tsx · PermisoBloqueado.tsx
 ├── hooks/        usePermiso.ts (hook unificado) · useRevisarAlVolver.ts (AppState)
 └── lib/          permisos.ts (toda la lógica de permisos) · ubicacion.ts
                   notificaciones.ts · store.ts (datos en memoria)

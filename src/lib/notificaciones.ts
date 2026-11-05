@@ -26,7 +26,7 @@ export async function simularResolucion(reporteId: string, avisarActivado: boole
   if (!reporte) return { notificacion: false };
 
   cambiarEstadoReporte(reporteId, 'en curso');
-  const titulo = 'Reporte resuelto ✅';
+  const titulo = 'Reporte resuelto';
   const cuerpo = `"${reporte.titulo}" (aula ${reporte.aula || 'sin aula'}) ya fue resuelto.`;
 
   const permiso = await consultar('notificaciones');

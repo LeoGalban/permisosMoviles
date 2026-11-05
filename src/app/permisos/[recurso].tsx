@@ -6,10 +6,10 @@
 
 import { router, useLocalSearchParams } from 'expo-router';
 
-import { PermisoBloqueado } from '@/components/PermisoBloqueado';
 import { Text, View } from 'react-native';
 
-import { Boton, Cargando, colores, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import { PermisoBloqueado } from '@/components/PermisoBloqueado';
+import { Boton, CajaIcono, Cargando, colores, Pantalla, Texto } from '@/components/ui';
 import { usePermiso } from '@/hooks/usePermiso';
 import {
   descartarPendiente,
@@ -58,19 +58,24 @@ function Contenido({ recurso }: { recurso: Recurso }) {
 
   return (
     <Pantalla>
-      <Tarjeta>
-        <View style={{ alignItems: 'center', gap: 10, paddingVertical: 12 }}>
-          <Text style={{ fontSize: 64 }}>{info.icono}</Text>
-          <Titulo>{info.nombre}</Titulo>
-          <Text style={{ fontSize: 18, textAlign: 'center', lineHeight: 26, color: colores.texto }}>
-            {info.beneficio}
-          </Text>
-        </View>
-        <Boton titulo="Continuar" onPress={continuar} />
-        <Text style={{ textAlign: 'center', color: colores.suave, fontSize: 14 }}>
-          Podés cambiar esta decisión cuando quieras desde Ajustes.
+      <View style={{ alignItems: 'center', gap: 12, paddingTop: 32, paddingBottom: 20 }}>
+        <CajaIcono nombre={info.icono} tam={32} />
+        <Text style={{ fontSize: 22, fontWeight: '700', color: colores.texto }}>{info.nombre}</Text>
+        <Text
+          style={{
+            fontSize: 16,
+            lineHeight: 24,
+            textAlign: 'center',
+            color: colores.texto,
+            maxWidth: 340,
+          }}>
+          {info.beneficio}
         </Text>
-      </Tarjeta>
+      </View>
+      <Boton titulo="Continuar" onPress={continuar} />
+      <Text style={{ textAlign: 'center', color: colores.suave, fontSize: 13, lineHeight: 18 }}>
+        Podés cambiar esta decisión cuando quieras desde Ajustes.
+      </Text>
     </Pantalla>
   );
 }

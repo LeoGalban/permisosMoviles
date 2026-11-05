@@ -7,7 +7,17 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { View } from 'react-native';
 
-import { Boton, Chip, estilos, Pantalla, Tarjeta, Texto, Titulo } from '@/components/ui';
+import {
+  Boton,
+  Chip,
+  estilos,
+  Fila,
+  Lista,
+  Pantalla,
+  Seccion,
+  Tarjeta,
+  Texto,
+} from '@/components/ui';
 import { usePermiso } from '@/hooks/usePermiso';
 import { usarConPermiso } from '@/lib/permisos';
 import { editarBorrador, SECTORES, useApp } from '@/lib/store';
@@ -31,34 +41,28 @@ export default function UbicacionReporte() {
 
   return (
     <Pantalla>
-      <Tarjeta>
-        <Titulo>Ubicación actual</Titulo>
-        {u ? (
-          u.aproximada ? (
-            <Texto>📍 Ubicación aproximada</Texto>
-          ) : (
-            <Texto>
-              📍 {u.latitud.toFixed(5)}, {u.longitud.toFixed(5)}
-            </Texto>
-          )
-        ) : (
-          <Texto suave>Sin ubicación.</Texto>
-        )}
-        {error && <Texto suave>No pudimos obtener la ubicación. Elegí el sector a mano.</Texto>}
-        <Boton
+      <Lista>
+        <Fila
+          icono="navigate-outline"
           titulo={buscando ? 'Buscando…' : 'Usar mi ubicación actual'}
-          deshabilitado={buscando}
-          onPress={() => usarConPermiso('ubicacion', marcarUbicacion)}
+          detalle={
+            u
+              ? u.aproximada
+                ? 'Ubicación aproximada'
+                : `${u.latitud.toFixed(5)}, ${u.longitud.toFixed(5)}`
+              : estado === 'bloqueado'
+                ? 'Ubicación bloqueada: elegí el sector a mano'
+                : 'Sin ubicación'
+          }
+          onPress={buscando ? undefined : () => usarConPermiso('ubicacion', marcarUbicacion)}
         />
-        {estado === 'bloqueado' && (
-          <Texto suave>La ubicación está bloqueada. Elegí el sector a mano.</Texto>
-        )}
-      </Tarjeta>
+      </Lista>
+      {error && <Texto suave>No pudimos obtener la ubicación. Elegí el sector a mano.</Texto>}
 
       {/* Alternativa: siempre se puede elegir el sector a mano */}
+      <Seccion>O elegí el sector</Seccion>
       <Tarjeta>
-        <Titulo>Sector</Titulo>
-        <View style={estilos.fila}>
+        <View style={estilos.grupo}>
           {SECTORES.map((s) => (
             <Chip
               key={s}
@@ -70,7 +74,7 @@ export default function UbicacionReporte() {
         </View>
       </Tarjeta>
 
-      <Boton titulo="Listo" onPress={() => router.back()} />
+      <Boton titulo="Listo" acento onPress={() => router.back()} />
     </Pantalla>
   );
 }
